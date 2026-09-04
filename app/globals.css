@@ -1,24 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --color-primary: #172033;
-  --color-accent: #2F6F7E;
-  --color-bg: #F6F7F5;
-  --color-card: #FFFFFF;
-  --color-text-primary: #172033;
-  --color-text-secondary: #667085;
-  --color-border: #E4E7EC;
-  --color-border-strong: #D0D5DD;
-  --color-hover: #F2F4F7;
-  --color-active-bg: #EBF3F5;
-  --color-active-border: #2F6F7E;
-  --color-status-ontrack: #027A48;
-  --color-status-ontrack-bg: #ECFDF3;
-  --color-status-atrisk: #B54708;
-  --color-status-atrisk-bg: #FFF4ED;
-  --color-status-delayed: #B42318;
-  --color-status-delayed-bg: #FEF3F2;
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
+  --color-primary: #294936;
+  --color-primary-light: #3D6B4E;
+  --color-secondary: #687653;
+  --color-secondary-light: #7C8B63;
+  --color-bg: #F3F0E7;
+  --color-surface: #FAF8F1;
+  --color-surface-elevated: #FFFFFF;
+  --color-accent: #A98255;
+  --color-highlight: #C9AA58;
+  --color-text-primary: #20251F;
+  --color-text-secondary: #687066;
+  --color-text-muted: #9AA392;
+  --color-border: #D5D0C2;
+  --color-border-strong: #C8C2B3;
+  --color-hover: #EBE7DC;
+  --color-active-bg: #E8F0EB;
+  --color-active-border: #294936;
+  --color-status-ontrack: #687653;
+  --color-status-ontrack-bg: #F0F3ED;
+  --color-status-atrisk: #A98255;
+  --color-status-atrisk-bg: #F5F0E8;
+  --color-status-delayed: #B85C4A;
+  --color-status-delayed-bg: #FDF0EF;
+  --color-status-inprogress: #294936;
+  --color-status-inprogress-bg: #E8F0EB;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.04);
   --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.04);
   --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.08), 0 4px 8px -4px rgb(0 0 0 / 0.04);
   --radius-sm: 6px;
@@ -30,11 +38,17 @@
 
 @theme inline {
   --color-primary: var(--color-primary);
-  --color-accent: var(--color-accent);
+  --color-primary-light: var(--color-primary-light);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-light: var(--color-secondary-light);
   --color-bg: var(--color-bg);
-  --color-card: var(--color-card);
+  --color-surface: var(--color-surface);
+  --color-surface-elevated: var(--color-surface-elevated);
+  --color-accent: var(--color-accent);
+  --color-highlight: var(--color-highlight);
   --color-text-primary: var(--color-text-primary);
   --color-text-secondary: var(--color-text-secondary);
+  --color-text-muted: var(--color-text-muted);
   --color-border: var(--color-border);
   --color-border-strong: var(--color-border-strong);
   --color-hover: var(--color-hover);
@@ -46,6 +60,8 @@
   --color-status-atrisk-bg: var(--color-status-atrisk-bg);
   --color-status-delayed: var(--color-status-delayed);
   --color-status-delayed-bg: var(--color-status-delayed-bg);
+  --color-status-inprogress: var(--color-status-inprogress);
+  --color-status-inprogress-bg: var(--color-status-inprogress-bg);
   --shadow-sm: var(--shadow-sm);
   --shadow-md: var(--shadow-md);
   --shadow-lg: var(--shadow-lg);
@@ -56,30 +72,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-primary: #F6F7F5;
-    --color-accent: #5AB3C7;
-    --color-bg: #172033;
-    --color-card: #1D2A3F;
-    --color-text-primary: #F6F7F5;
-    --color-text-secondary: #9AA3AF;
-    --color-border: #2D3A50;
-    --color-border-strong: #3D4A60;
-    --color-hover: #1D2A3F;
-    --color-active-bg: #1A3A4A;
-    --color-active-border: #5AB3C7;
-    --color-status-ontrack: #34D399;
-    --color-status-ontrack-bg: #064E3B;
-    --color-status-atrisk: #FBBF24;
-    --color-status-atrisk-bg: #78350F;
-    --color-status-delayed: #F87171;
-    --color-status-delayed-bg: #7F1D1D;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.2);
-    --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.2);
-    --shadow-lg: 0 12px 24px -4px rgb(0 0 0 / 0.4), 0 4px 8px -4px rgb(0 0 0 / 0.2);
-  }
-}
+
 
 * {
   border-color: var(--color-border);
@@ -99,13 +92,13 @@ body {
 }
 
 .sidebar {
-  background: var(--color-card);
+  background: var(--color-surface-elevated);
   border-right: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
 
 .header {
-  background: var(--color-card);
+  background: var(--color-surface-elevated);
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
 }
@@ -122,13 +115,13 @@ body {
 }
 
 .nav-item.active {
-  color: var(--color-accent);
+  color: var(--color-primary);
   background-color: var(--color-active-bg);
   border-left-color: var(--color-active-border);
 }
 
 .nav-item.active:hover {
-  color: var(--color-accent);
+  color: var(--color-primary);
   background-color: var(--color-active-bg);
 }
 
@@ -167,12 +160,12 @@ body {
 }
 
 .status-in-progress {
-  background-color: var(--color-active-bg);
-  color: var(--color-accent);
+  background-color: var(--color-status-inprogress-bg);
+  color: var(--color-status-inprogress);
 }
 
 .card {
-  background: var(--color-card);
+  background: var(--color-surface-elevated);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
@@ -225,7 +218,7 @@ body {
   ring: 2px;
   ring-color: var(--color-accent);
   ring-offset: 2px;
-  ring-offset-color: var(--color-card);
+  ring-offset-color: var(--color-surface-elevated);
 }
 
 .text-balance {

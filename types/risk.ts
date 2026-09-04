@@ -8,4 +8,5 @@ export interface Risk {
   status: "Open" | "Monitoring" | "Resolved";
   identifiedDate: string;
   expectedImpact: string;
+  relatedActivityIds?: string[];
 }

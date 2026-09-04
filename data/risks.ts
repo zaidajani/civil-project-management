@@ -11,6 +11,7 @@ export const risks: Risk[] = [
     status: "Open",
     identifiedDate: "2026-08-15",
     expectedImpact: "3-4 week delay to slab completion, potential 2-week delay to overall project if not mitigated",
+    relatedActivityIds: ["task-025", "task-026"],
   },
   {
     id: "risk-002",
@@ -22,6 +23,7 @@ export const risks: Risk[] = [
     status: "Monitoring",
     identifiedDate: "2026-07-01",
     expectedImpact: "Continued slow progress on structural package. Risk of 4-6 week overall delay if not resolved by Q1 2027",
+    relatedActivityIds: ["task-023", "task-024", "task-025", "task-026"],
   },
   {
     id: "risk-003",
@@ -33,6 +35,7 @@ export const risks: Risk[] = [
     status: "Resolved",
     identifiedDate: "2026-05-20",
     expectedImpact: "Caused initial 3-week delay to column reinforcement. Mitigated by engaging alternative supplier with cost premium",
+    relatedActivityIds: ["task-021", "task-022"],
   },
   {
     id: "risk-004",
@@ -44,6 +47,7 @@ export const risks: Risk[] = [
     status: "Open",
     identifiedDate: "2026-11-01",
     expectedImpact: "Potential 2-3 week delay to electrical installation if cables not delivered by February 2027",
+    relatedActivityIds: ["task-037", "task-038"],
   },
   {
     id: "risk-005",
@@ -55,5 +59,6 @@ export const risks: Risk[] = [
     status: "Monitoring",
     identifiedDate: "2026-01-15",
     expectedImpact: "Seasonal productivity loss already factored into baseline. Risk of additional 1-2 weeks if monsoon extends beyond September",
+    relatedActivityIds: [],
   },
 ];
