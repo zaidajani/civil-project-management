@@ -10,6 +10,7 @@ const navigation = [
   { href: "/pm/review", label: "Review Queue", icon: "review" },
   { href: "/pm/tasks", label: "Tasks", icon: "tasks" },
   { href: "/pm/hierarchy", label: "Hierarchy", icon: "hierarchy" },
+  { href: "/pm/people", label: "Execution Hierarchy", icon: "people" },
   { href: "/pm/progress", label: "Progress", icon: "progress" },
   { href: "/pm/risks", label: "Risks & Delays", icon: "risks" },
   { href: "/pm/reports", label: "Reports", icon: "reports" },
@@ -66,6 +67,14 @@ const Icons = {
       <path d="M8 12h8" />
       <path d="M8 8h8" />
       <path d="M8 16h8" />
+    </svg>
+  ),
+  people: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
     </svg>
   ),
   progress: (
