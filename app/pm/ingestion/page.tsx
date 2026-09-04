@@ -7,6 +7,7 @@ import { matchProgressEvents } from "@/lib/matching";
 import { parseSpreadsheetData, validateSpreadsheetHeaders } from "@/lib/spreadsheet";
 import { tasks } from "@/data/tasks";
 import { IngestionHistory } from "@/components/ingestion/IngestionHistory";
+import { getPendingSupervisorReports, markSupervisorReportProcessed } from "@/lib/reports";
 import * as XLSX from "xlsx";
 
 const SAMPLE_REPORT = `Daily Progress Report — 04 Sep 2026
@@ -52,7 +53,7 @@ function determineIngestionStatus(matches: ActivityMatch[]): IngestionRecord["st
 }
 
 export default function IngestionPage() {
-  const [mode, setMode] = useState<"daily" | "spreadsheet">("daily");
+  const [mode, setMode] = useState<"daily" | "spreadsheet" | "supervisor">("daily");
   const [reportText, setReportText] = useState<string>("");
   const [events, setEvents] = useState<ProgressEvent[]>([]);
   const [matches, setMatches] = useState<ActivityMatch[]>([]);
@@ -64,6 +65,8 @@ export default function IngestionPage() {
   const [spreadsheetHeaders, setSpreadsheetHeaders] = useState<string[]>([]);
   const [spreadsheetError, setSpreadsheetError] = useState<string | null>(null);
   const [showSpreadsheetPreview, setShowSpreadsheetPreview] = useState(false);
+  const [supervisorReports, setSupervisorReports] = useState<{ id: string; submittedAt: string; submittedBy: string; reportText: string }[]>([]);
+  const [selectedSupervisorReport, setSelectedSupervisorReport] = useState<{ id: string; submittedAt: string; submittedBy: string; reportText: string } | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -73,6 +76,18 @@ export default function IngestionPage() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (mode === "supervisor" && typeof window !== "undefined") {
+      const reports = getPendingSupervisorReports();
+      setSupervisorReports(reports.map(r => ({
+        id: r.id,
+        submittedAt: r.submittedAt,
+        submittedBy: r.submittedBy,
+        reportText: r.reportText,
+      })));
+    }
+  }, [mode]);
 
   const handleLoadSample = () => {
     setReportText(SAMPLE_REPORT);
@@ -111,6 +126,49 @@ export default function IngestionPage() {
       localStorage.setItem("ingestion_events", JSON.stringify(extracted));
       localStorage.setItem("ingestion_matches", JSON.stringify(matched));
       localStorage.setItem("ingestion_records", JSON.stringify(updatedRecords));
+    }
+    setShowSource(true);
+  };
+
+  const handleProcessSupervisorReport = (report: { id: string; submittedAt: string; submittedBy: string; reportText: string }) => {
+    if (!report.reportText.trim()) return;
+    const extracted = extractProgressEvents(report.reportText);
+    setEvents(extracted);
+    const matched = matchProgressEvents(extracted, tasks);
+    setMatches(matched);
+    setViewedRecord(null);
+    setSelectedSupervisorReport(report);
+
+    const matchedCount = matched.filter((m) => m.matchStatus === "MATCHED" || m.matchStatus === "EXACT").length;
+    const needsReviewCount = matched.filter((m) => m.matchStatus === "REVIEW" || m.confidence < 80).length;
+
+    const record: IngestionRecord = {
+      id: generateId(),
+      sourceType: "DAILY_REPORT",
+      sourceName: `Supervisor Report - ${report.submittedBy}`,
+      submittedAt: new Date().toISOString(),
+      submittedBy: "Project Manager",
+      rawText: report.reportText,
+      eventsExtracted: extracted.length,
+      eventsMatched: matchedCount,
+      eventsNeedingReview: needsReviewCount,
+      status: determineIngestionStatus(matched),
+    };
+
+    const updatedRecords = [record, ...ingestionRecords];
+    setIngestionRecords(updatedRecords);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("ingestion_events", JSON.stringify(extracted));
+      localStorage.setItem("ingestion_matches", JSON.stringify(matched));
+      localStorage.setItem("ingestion_records", JSON.stringify(updatedRecords));
+      markSupervisorReportProcessed(report.id);
+      const updatedReports = getPendingSupervisorReports();
+      setSupervisorReports(updatedReports.map(r => ({
+        id: r.id,
+        submittedAt: r.submittedAt,
+        submittedBy: r.submittedBy,
+        reportText: r.reportText,
+      })));
     }
     setShowSource(true);
   };
@@ -289,6 +347,16 @@ export default function IngestionPage() {
           >
             Spreadsheet
           </button>
+          <button
+            onClick={() => { setMode("supervisor"); setEvents([]); setMatches([]); setViewedRecord(null); }}
+            className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors focus-ring ${
+              mode === "supervisor"
+                ? "bg-primary text-white"
+                : "text-text-secondary bg-hover hover:bg-border"
+            }`}
+          >
+            Supervisor Reports
+          </button>
         </div>
 
         {mode === "daily" && (
@@ -432,6 +500,55 @@ export default function IngestionPage() {
               </div>
             )}
           </>
+        )}
+
+        {mode === "supervisor" && (
+          <div className="space-y-4">
+            {supervisorReports.length === 0 ? (
+              <div className="card p-8 text-center">
+                <svg className="mx-auto h-12 w-12 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <p className="mt-4 text-text-secondary">No pending supervisor reports.</p>
+                <p className="mt-2 text-sm text-text-muted">Reports submitted from the Supervisor Portal will appear here.</p>
+              </div>
+            ) : (
+              <>
+                <div className="card p-4">
+                  <h3 className="font-semibold text-text-primary mb-3">Pending Supervisor Reports ({supervisorReports.length})</h3>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {supervisorReports.map((report) => (
+                      <div key={report.id} className="border border-border rounded-lg p-4 hover:bg-hover/50 transition-colors">
+                        <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
+                                SUPERVISOR
+                              </span>
+                              <span className="text-sm text-text-secondary font-mono">
+                                {new Date(report.submittedAt).toLocaleString("en-GB", {
+                                  day: "2-digit", month: "short", year: "numeric",
+                                  hour: "2-digit", minute: "2-digit"
+                                })}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm text-text-secondary truncate">{report.reportText.slice(0, 150)}{report.reportText.length > 150 ? "..." : ""}</p>
+                            <p className="mt-1 text-xs text-text-muted">Submitted by: {report.submittedBy}</p>
+                          </div>
+                          <button
+                            onClick={() => handleProcessSupervisorReport(report)}
+                            className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-light transition-colors focus-ring whitespace-nowrap"
+                          >
+                            Import & Process
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         )}
       </div>
 
