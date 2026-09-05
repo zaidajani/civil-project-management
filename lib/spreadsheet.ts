@@ -55,7 +55,7 @@ function normalizeDiscipline(disciplineStr: string): string {
   return disciplineStr.charAt(0).toUpperCase() + disciplineStr.slice(1).toLowerCase();
 }
 
-export function parseSpreadsheetData(rows: SpreadsheetRow[]): ProgressEvent[] {
+export function parseSpreadsheetData(rows: SpreadsheetRow[], sourceType: "DAILY_REPORT" | "SPREADSHEET" | "SUPERVISOR" = "SPREADSHEET"): ProgressEvent[] {
   const events: ProgressEvent[] = [];
   
   for (const row of rows) {
@@ -80,7 +80,7 @@ export function parseSpreadsheetData(rows: SpreadsheetRow[]): ProgressEvent[] {
       discipline,
       eventType,
       eventTime,
-      sourceType: "SPREADSHEET",
+      sourceType,
       status: "EXTRACTED",
     };
     

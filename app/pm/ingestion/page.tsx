@@ -98,7 +98,7 @@ export default function IngestionPage() {
 
   const handleProcess = () => {
     if (!reportText.trim()) return;
-    const extracted = extractProgressEvents(reportText);
+    const extracted = extractProgressEvents(reportText, "DAILY_REPORT");
     setEvents(extracted);
     const matched = matchProgressEvents(extracted, tasks);
     setMatches(matched);
@@ -132,7 +132,7 @@ export default function IngestionPage() {
 
   const handleProcessSupervisorReport = (report: { id: string; submittedAt: string; submittedBy: string; reportText: string }) => {
     if (!report.reportText.trim()) return;
-    const extracted = extractProgressEvents(report.reportText);
+    const extracted = extractProgressEvents(report.reportText, "SUPERVISOR");
     setEvents(extracted);
     const matched = matchProgressEvents(extracted, tasks);
     setMatches(matched);
@@ -144,7 +144,7 @@ export default function IngestionPage() {
 
     const record: IngestionRecord = {
       id: generateId(),
-      sourceType: "DAILY_REPORT",
+      sourceType: "SUPERVISOR",
       sourceName: `Supervisor Report - ${report.submittedBy}`,
       submittedAt: new Date().toISOString(),
       submittedBy: "Project Manager",
@@ -279,7 +279,7 @@ export default function IngestionPage() {
     if (spreadsheetRows.length === 0) return;
     
     setSpreadsheetError(null);
-    const extracted = parseSpreadsheetData(spreadsheetRows);
+    const extracted = parseSpreadsheetData(spreadsheetRows, "SPREADSHEET");
     setEvents(extracted);
     const matched = matchProgressEvents(extracted, tasks);
     setMatches(matched);
@@ -591,6 +591,10 @@ export default function IngestionPage() {
                         {event.sourceType === "SPREADSHEET" ? (
                           <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-accent/10 text-accent">
                             Spreadsheet
+                          </span>
+                        ) : event.sourceType === "SUPERVISOR" ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
+                            Supervisor
                           </span>
                         ) : (
                           "Daily Report"

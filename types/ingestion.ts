@@ -5,7 +5,7 @@ export interface ProgressEvent {
   discipline: string;
   eventType: "START" | "END";
   eventTime?: string;
-  sourceType: "DAILY_REPORT" | "SPREADSHEET";
+  sourceType: "DAILY_REPORT" | "SPREADSHEET" | "SUPERVISOR";
   status: "EXTRACTED";
 }
 
@@ -35,7 +35,7 @@ export interface ReviewItem {
   selectedActivityId: string | null;
   selectedActivityCode: string | null;
   selectedActivityName: string | null;
-  reviewStatus: "PENDING" | "REVIEWED";
+  reviewStatus: "PENDING" | "REVIEWED" | "REJECTED";
   reviewedAt?: string;
 }
 
@@ -51,14 +51,14 @@ export interface ScheduleUpdateAudit {
   newActualEnd?: string;
   updateType: "ACTUAL_START" | "ACTUAL_END";
   confidence: number;
-  sourceType: "DAILY_REPORT" | "SPREADSHEET";
+  sourceType: "DAILY_REPORT" | "SPREADSHEET" | "SUPERVISOR";
   updatedAt: string;
   updatedBy: string;
 }
 
 export interface IngestionRecord {
   id: string;
-  sourceType: "DAILY_REPORT" | "SPREADSHEET";
+  sourceType: "DAILY_REPORT" | "SPREADSHEET" | "SUPERVISOR";
   sourceName: string;
   submittedAt: string;
   submittedBy: string;

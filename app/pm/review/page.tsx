@@ -33,6 +33,7 @@ function getConfidenceClass(confidence: number): string {
 
 function getStatusClass(status: ReviewItem["reviewStatus"]): string {
   if (status === "REVIEWED") return "bg-status-ontrack-bg text-status-ontrack";
+  if (status === "REJECTED") return "bg-status-delayed-bg text-status-delayed";
   return "bg-status-atrisk-bg text-status-atrisk";
 }
 
@@ -156,11 +157,27 @@ export default function ReviewPage() {
     setSearchQuery("");
   };
 
+  const handleReject = () => {
+    if (!selectedItemId) return;
+
+    const now = new Date().toISOString();
+    setReviewItems((prev) =>
+      prev.map((item) =>
+        item.eventId === selectedItemId
+          ? { ...item, reviewStatus: "REJECTED" as const, reviewedAt: now }
+          : item
+      )
+    );
+    setSelectedItemId(null);
+    setSearchQuery("");
+  };
+
   const summary = useMemo(() => ({
     total: reviewItems.length,
     unmatched: reviewItems.filter((i) => !i.suggestedMatch.matchedActivityId).length,
     lowConfidence: reviewItems.filter((i) => i.suggestedMatch.confidence < 80 && i.suggestedMatch.matchedActivityId).length,
     reviewed: reviewItems.filter((i) => i.reviewStatus === "REVIEWED").length,
+    rejected: reviewItems.filter((i) => i.reviewStatus === "REJECTED").length,
   }), [reviewItems]);
 
   return (
@@ -189,7 +206,7 @@ export default function ReviewPage() {
         <>
           <div className="card p-6 lg:p-8">
             <h2 className="text-lg font-semibold text-text-primary mb-4">Summary</h2>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
               <div className="p-4 bg-bg border border-border rounded-lg">
                 <div className="text-2xl font-semibold text-text-primary">{summary.total}</div>
                 <div className="text-sm text-text-secondary">Total Reviews</div>
@@ -205,6 +222,10 @@ export default function ReviewPage() {
               <div className="p-4 bg-bg border border-border rounded-lg">
                 <div className="text-2xl font-semibold text-status-ontrack">{summary.reviewed}</div>
                 <div className="text-sm text-text-secondary">Reviewed</div>
+              </div>
+              <div className="p-4 bg-bg border border-border rounded-lg">
+                <div className="text-2xl font-semibold text-status-delayed">{summary.rejected}</div>
+                <div className="text-sm text-text-secondary">Rejected</div>
               </div>
             </div>
           </div>
@@ -267,7 +288,7 @@ export default function ReviewPage() {
                           </td>
                           <td className="py-3">
                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getStatusClass(item.reviewStatus)}`}>
-                              {item.reviewStatus === "REVIEWED" ? "Reviewed" : "Needs Review"}
+                              {item.reviewStatus === "REVIEWED" ? "Reviewed" : item.reviewStatus === "REJECTED" ? "Rejected" : "Needs Review"}
                             </span>
                           </td>
                           <td className="py-3">
@@ -328,6 +349,56 @@ export default function ReviewPage() {
                                 </>
                               ) : (
                                 <span className="text-text-muted">—</span>
+                              )}
+                            </td>
+                            <td className="py-3">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getConfidenceClass(item.suggestedMatch.confidence)}`}>
+                                {item.suggestedMatch.confidence}%
+                              </span>
+                            </td>
+                            <td className="py-3 text-text-secondary font-mono">
+                              {item.reviewedAt ? new Date(item.reviewedAt).toLocaleString() : "—"}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {reviewItems.some((i) => i.reviewStatus === "REJECTED") && (
+            <div className="card p-6 lg:p-8">
+              <h2 className="text-lg font-semibold text-text-primary mb-4">Rejected Items</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left pb-2 font-medium text-text-secondary">Source Event</th>
+                      <th className="text-left pb-2 font-medium text-text-secondary">Original Match</th>
+                      <th className="text-left pb-2 font-medium text-text-secondary">Original Confidence</th>
+                      <th className="text-left pb-2 font-medium text-text-secondary">Rejected At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {reviewItems
+                      .filter((i) => i.reviewStatus === "REJECTED")
+                      .map((item) => {
+                        const event = events.find((e) => e.id === item.eventId);
+                        return (
+                          <tr key={item.eventId} className="border-b border-border/50">
+                            <td className="py-3 text-text-primary font-mono max-w-xs truncate">
+                              {event?.activityDescription ?? "—"}
+                            </td>
+                            <td className="py-3 text-text-secondary">
+                              {item.suggestedMatch.matchedActivityId ? (
+                                <>
+                                  <div className="font-medium">{item.suggestedMatch.matchedActivityName}</div>
+                                  <div className="text-xs text-text-muted font-mono">{item.suggestedMatch.matchedActivityCode}</div>
+                                </>
+                              ) : (
+                                <span className="text-text-muted">No confident match</span>
                               )}
                             </td>
                             <td className="py-3">
@@ -502,6 +573,12 @@ export default function ReviewPage() {
                   className="px-4 py-2 text-sm font-medium text-text-primary bg-hover border border-border rounded-lg hover:bg-border transition-colors focus-ring"
                 >
                   Cancel
+                </button>
+                <button
+                  onClick={handleReject}
+                  className="px-4 py-2 text-sm font-medium text-status-delayed bg-status-delayed-bg border border-status-delayed/30 rounded-lg hover:bg-status-delayed-bg/20 transition-colors focus-ring"
+                >
+                  Reject / Skip
                 </button>
                 <button
                   onClick={handleApprove}

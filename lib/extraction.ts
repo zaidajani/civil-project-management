@@ -36,7 +36,7 @@ function determineEventType(text: string): "START" | "END" {
   return "START";
 }
 
-export function extractProgressEvents(text: string): ProgressEvent[] {
+export function extractProgressEvents(text: string, sourceType: "DAILY_REPORT" | "SPREADSHEET" | "SUPERVISOR" = "DAILY_REPORT"): ProgressEvent[] {
   const events: ProgressEvent[] = [];
   let currentDiscipline = "General";
 
@@ -66,7 +66,7 @@ export function extractProgressEvents(text: string): ProgressEvent[] {
         discipline,
         eventType,
         eventTime,
-        sourceType: "DAILY_REPORT",
+        sourceType,
         status: "EXTRACTED",
       };
 
