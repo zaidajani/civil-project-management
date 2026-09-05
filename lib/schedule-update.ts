@@ -6,7 +6,7 @@ function generateId(): string {
   return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
-function parseEventTime(eventTime: string | undefined, reportDate: string = "2026-09-04"): string {
+function parseEventTime(eventTime: string | undefined, reportDate: string): string {
   if (!eventTime) return reportDate;
   
   const timeMatch = eventTime.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
@@ -23,6 +23,26 @@ function parseEventTime(eventTime: string | undefined, reportDate: string = "202
   date.setHours(hours, minutes, 0, 0);
   
   return date.toISOString().split("T")[0];
+}
+
+function extractReportDate(rawText: string): string {
+  const dateMatch = rawText.match(/(\d{1,2}\s+\w+\s+\d{4})/);
+  if (dateMatch) {
+    const parts = dateMatch[1].split(" ");
+    const day = parts[0].padStart(2, "0");
+    const monthMap: Record<string, string> = {
+      "Jan": "01", "Feb": "02", "Mar": "03", "Apr": "04",
+      "May": "05", "Jun": "06", "Jul": "07", "Aug": "08",
+      "Sep": "09", "Oct": "10", "Nov": "11", "Dec": "12",
+      "January": "01", "February": "02", "March": "03", "April": "04",
+      "June": "06", "July": "07", "August": "08", "September": "09",
+      "October": "10", "November": "11", "December": "12"
+    };
+    const month = monthMap[parts[1]] || "01";
+    const year = parts[2];
+    return `${year}-${month}-${day}`;
+  }
+  return "2026-09-04";
 }
 
 function determineStatus(task: Task, event: ProgressEvent): Task["status"] {
@@ -47,9 +67,9 @@ function determineProgress(task: Task, event: ProgressEvent): number {
   return task.actualProgress;
 }
 
-export function applyProgressEvent(task: Task, event: ProgressEvent): Task {
-  const reportDate = "2026-09-04";
-  const eventDate = parseEventTime(event.eventTime, reportDate);
+export function applyProgressEvent(task: Task, event: ProgressEvent, reportDate?: string): Task {
+  const parsedReportDate = reportDate || extractReportDate(event.rawText);
+  const eventDate = parseEventTime(event.eventTime, parsedReportDate);
   
   const updated: Task = { ...task };
   
@@ -76,12 +96,13 @@ export function updateTaskFromEvent(
   task: Task,
   event: ProgressEvent,
   confidence: number,
-  updatedBy: string = "Project Manager"
+  updatedBy: string = "Project Manager",
+  reportDate?: string
 ): { updatedTask: Task; audit: ScheduleUpdateAudit } {
   const previousActualStart = task.actualStart;
   const previousActualEnd = task.actualEnd;
   
-  const updatedTask = applyProgressEvent(task, event);
+  const updatedTask = applyProgressEvent(task, event, reportDate);
   
   const updateType = event.eventType === "START" ? "ACTUAL_START" : "ACTUAL_END";
   
@@ -97,7 +118,7 @@ export function updateTaskFromEvent(
     newActualEnd: updatedTask.actualEnd,
     updateType,
     confidence,
-    sourceType: "DAILY_REPORT",
+    sourceType: event.sourceType,
     updatedAt: new Date().toISOString(),
     updatedBy,
   };

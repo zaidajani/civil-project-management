@@ -128,7 +128,7 @@ export default function ReviewPage() {
 
     const confidence = selectedItem.suggestedMatch.confidence;
     
-    const { updatedTask, audit } = updateTaskFromEvent(selectedTask, event, confidence);
+    const { updatedTask, audit } = updateTaskFromEvent(selectedTask, event, confidence, "Project Manager", event.rawText);
     
     if (typeof window !== "undefined") {
       const storedTasks = localStorage.getItem("schedule_tasks");
