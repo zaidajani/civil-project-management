@@ -51,7 +51,11 @@ export function Header() {
           {showNotifications && (
             <div className="absolute right-0 top-full mt-2 w-80 card-elevated py-2 animate-in fade-in-0 zoom-in-95 duration-150">
               <div className="px-4 py-2.5 border-b font-medium text-sm text-text-primary">Notifications</div>
-              <div className="px-4 py-4 text-text-secondary text-sm">No new notifications</div>
+              <div className="divide-y divide-border">
+                <div className="px-4 py-3 hover:bg-hover"><p className="text-sm font-medium text-text-primary">Beam B12 update received</p><p className="mt-1 text-xs text-text-secondary">Supervisor Rahul submitted a progress update · 20 min ago</p></div>
+                <div className="px-4 py-3 hover:bg-hover"><p className="text-sm font-medium text-text-primary">3 activities need review</p><p className="mt-1 text-xs text-text-secondary">Low-confidence matches are waiting in Review Queue</p></div>
+                <div className="px-4 py-3 hover:bg-hover"><p className="text-sm font-medium text-text-primary">Weekly report is ready</p><p className="mt-1 text-xs text-text-secondary">Project Control Report generated today</p></div>
+              </div>
             </div>
           )}
         </div>

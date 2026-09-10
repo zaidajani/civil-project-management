@@ -72,6 +72,7 @@ export default function PeoplePage() {
   const [selectedMember, setSelectedMember] = useState<ExecutionMember | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [highlightedMemberId, setHighlightedMemberId] = useState<string | null>(null);
+  const [workforceFile, setWorkforceFile] = useState<string | null>(null);
 
   const memberMap = useMemo(() => buildTree(executionHierarchy), []);
   const rootMembers = useMemo(() => 
@@ -243,6 +244,21 @@ export default function PeoplePage() {
           </div>
         </div>
       </div>
+
+      <section className="card p-5 lg:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div><h2 className="text-lg font-semibold text-text-primary">Upload workforce data Excel</h2><p className="mt-1 text-sm text-text-secondary">Import a dummy workforce roster to refresh labour and supervisor records.</p></div>
+          <label className="inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-light cursor-pointer transition-colors">
+            {workforceFile ? "Replace Excel file" : "Choose Excel file"}
+            <input type="file" accept=".xlsx,.xls,.csv" className="sr-only" onChange={(event) => setWorkforceFile(event.target.files?.[0]?.name ?? null)} />
+          </label>
+        </div>
+        <div className="mt-4 flex items-center gap-3 rounded-lg border border-dashed border-border bg-bg px-4 py-3 text-sm">
+          <span className="w-9 h-9 rounded-lg bg-active-bg text-primary flex items-center justify-center font-semibold">XLS</span>
+          <div className="min-w-0"><p className="font-medium text-text-primary truncate">{workforceFile ?? "No file selected"}</p><p className="text-xs text-text-secondary">Supported formats: .xlsx, .xls, .csv · Prototype import only</p></div>
+          {workforceFile && <span className="ml-auto status-badge bg-status-ontrack-bg text-status-ontrack">Ready to import</span>}
+        </div>
+      </section>
 
       <div className="card">
         <div className="overflow-x-auto overflow-y-auto max-h-[60vh] p-4">

@@ -81,6 +81,13 @@ function getLatestProgress(taskId: string): number {
   return latest.actualProgress;
 }
 
+const previousReports = [
+  { id: "PCR-2026-09-09", title: "Project Control Report", date: "2026-09-09", type: "Daily control report", status: "Downloaded", summary: "Progress remained stable across structural works, with two high-priority risks under monitoring.", highlights: "Actual progress 52% · Variance -15% · 3 open risks" },
+  { id: "PCR-2026-09-08", title: "Project Control Report", date: "2026-09-08", type: "Daily control report", status: "Downloaded", summary: "Electrical conduit verification was completed and the east-block review queue was reduced.", highlights: "Actual progress 50% · Variance -14% · 4 open risks" },
+  { id: "PCR-2026-09-05", title: "Weekly Project Summary", date: "2026-09-05", type: "Weekly summary", status: "Archived", summary: "The weekly lookahead captured beam shuttering, reinforcement, and concrete-pour dependencies.", highlights: "Actual progress 47% · 8 priority activities · 6 reports" },
+  { id: "PCR-2026-09-01", title: "Project Control Report", date: "2026-09-01", type: "Daily control report", status: "Archived", summary: "Site reporting was consolidated from supervisor updates and spreadsheet imports.", highlights: "Actual progress 43% · Match rate 82% · 2 items for review" },
+];
+
 export default function ReportsPage() {
   const [ingestionRecords, setIngestionRecords] = useState<IngestionRecord[]>([]);
   const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
@@ -149,8 +156,18 @@ export default function ReportsPage() {
     return [...auditTrail].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 10);
   }, [auditTrail]);
 
-  const handlePrint = () => {
-    window.print();
+  const downloadReport = () => {
+    const reportDate = new Date().toISOString().slice(0, 10);
+    const reportHtml = `<!doctype html><html><head><meta charset="utf-8"><title>CivilManager Project Control Report - ${reportDate}</title><style>body{font-family:Arial,sans-serif;color:#26312b;margin:0;background:#f5f4ee}main{max-width:980px;margin:0 auto;padding:48px}header{border-bottom:2px solid #d9d5ca;padding-bottom:22px;margin-bottom:28px}h1{font-size:30px;margin:0 0 8px}h2{font-size:18px;margin:30px 0 12px;color:#315740}p{line-height:1.5;color:#657068}.meta{font-size:12px;color:#657068}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:#fff;border:1px solid #d9d5ca;border-radius:10px;padding:16px}.label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#657068}.value{font-size:25px;font-weight:700;margin-top:7px}.risk{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.risk .value{font-size:22px}.note{background:#fff;border-left:4px solid #315740;padding:14px 16px;margin:10px 0}.footer{margin-top:36px;border-top:1px solid #d9d5ca;padding-top:16px;font-size:11px;color:#657068}@media(max-width:700px){main{padding:24px}.grid,.risk{grid-template-columns:repeat(2,1fr)}}</style></head><body><main><header><h1>CivilManager · Project Control Report</h1><p>Consolidated view of schedule performance, field updates, matching quality and project risks.</p><div class="meta">Generated ${new Date().toLocaleString("en-GB")}</div></header><h2>Progress snapshot</h2><div class="grid"><div class="card"><div class="label">Planned progress</div><div class="value">${projectVariance.plannedProgress}%</div></div><div class="card"><div class="label">Actual progress</div><div class="value">${projectVariance.actualProgress}%</div></div><div class="card"><div class="label">Overall variance</div><div class="value">${getVarianceLabel(projectVariance.variance)}</div></div><div class="card"><div class="label">L5/L6 activities</div><div class="value">${projectVariance.onTrack + projectVariance.atRisk + projectVariance.delayed + projectVariance.completed}</div></div></div><h2>Activity health</h2><div class="risk"><div class="card"><div class="label">Completed</div><div class="value">${projectVariance.completed}</div></div><div class="card"><div class="label">On track</div><div class="value">${projectVariance.onTrack}</div></div><div class="card"><div class="label">At risk</div><div class="value">${projectVariance.atRisk}</div></div><div class="card"><div class="label">Delayed</div><div class="value">${projectVariance.delayed}</div></div></div><h2>Data ingestion</h2><div class="grid"><div class="card"><div class="label">Daily reports</div><div class="value">${dailyReports.length}</div></div><div class="card"><div class="label">Spreadsheets</div><div class="value">${spreadsheets.length}</div></div><div class="card"><div class="label">Events extracted</div><div class="value">${totalEventsExtracted}</div></div><div class="card"><div class="label">Match rate</div><div class="value">${matchRate}%</div></div></div><h2>Risk summary</h2><div class="note"><strong>${openRisks} open risks</strong> · ${criticalRisks} critical · ${highRisks} high · ${monitoringRisks} being monitored</div><h2>Priority activities</h2>${topPriorityActivities.length ? topPriorityActivities.slice(0, 8).map(a => `<div class="note"><strong>${a.activityCode} · ${a.name}</strong><br><span>${a.actualProgress}% actual progress · ${getVarianceLabel(a.variance)} · ${a.healthStatus.replace("_", " ")}</span></div>`).join("") : "<p>No delayed or at-risk activities.</p>"}<div class="footer">CivilManager · Project Manager Portal · Dummy prototype data</div></main></body></html>`;
+    const blob = new Blob([reportHtml], { type: "text/html;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `civilmanager-project-control-report-${reportDate}.html`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -163,10 +180,10 @@ export default function ReportsPage() {
           </p>
         </div>
         <button
-          onClick={handlePrint}
-          className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-light transition-colors focus-ring hidden print:block"
+          onClick={downloadReport}
+          className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-light transition-colors focus-ring"
         >
-          Print Report
+          Download Report
         </button>
       </div>
 
@@ -429,12 +446,35 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      <div className="print:hidden" style={{ pageBreakAfter: 'always' }}>
-        <button
-          onClick={handlePrint}
-          className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-light transition-colors focus-ring"
-        >
-          Print Report
+      <section className="card p-6 print:shadow-none">
+        <div className="flex items-start justify-between gap-4 mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-text-primary">Previous Reports</h2>
+            <p className="mt-1 text-sm text-text-secondary">Earlier project control snapshots available for reference.</p>
+          </div>
+          <span className="text-xs font-medium text-text-muted">{previousReports.length} reports</span>
+        </div>
+        <div className="divide-y divide-border border border-border rounded-lg overflow-hidden">
+          {previousReports.map(report => (
+            <div key={report.id} className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between hover:bg-hover/50">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="font-medium text-text-primary">{report.title}</h3>
+                  <span className="status-badge bg-status-ontrack-bg text-status-ontrack">{report.status}</span>
+                </div>
+                <p className="mt-1 text-sm text-text-secondary">{formatDate(report.date)} · {report.type}</p>
+                <p className="mt-2 text-sm text-text-secondary">{report.summary}</p>
+                <p className="mt-2 text-xs font-medium text-text-muted">{report.highlights}</p>
+              </div>
+              <button type="button" onClick={downloadReport} className="shrink-0 text-sm font-medium text-primary hover:text-primary-light">Download current →</button>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <div className="print:hidden flex justify-end">
+        <button onClick={downloadReport} className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary-light transition-colors focus-ring">
+          Download Report
         </button>
       </div>
     </div>
