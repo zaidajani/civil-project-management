@@ -15,6 +15,7 @@ const navigation = [
 export function SupervisorLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
   return <div className="min-h-screen bg-bg flex">
     <aside className="sidebar fixed top-0 left-0 z-40 h-screen w-64 flex flex-col border-r">
@@ -49,10 +50,11 @@ export function SupervisorLayout({ children }: { children: ReactNode }) {
         <div><h1 className="text-base font-semibold text-text-primary">Mumbai Metro Station</h1><p className="text-xs text-text-secondary">Supervisor workspace</p></div>
         <div className="flex items-center gap-3 relative">
           <span className="status-badge status-in-progress hidden sm:inline-flex">Day shift</span>
-          <button onClick={() => setNotificationsOpen(!notificationsOpen)} className="btn-icon p-2 rounded-md focus-ring relative" aria-label="Notifications">
+          <button onClick={() => { setNotificationsOpen(!notificationsOpen); setProfileOpen(false); }} className="btn-icon p-2 rounded-md focus-ring relative" aria-label="Notifications">
             <span aria-hidden="true">♧</span><span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-status-delayed rounded-full" />
           </button>
-          {notificationsOpen && <div className="absolute right-0 top-12 w-80 card-elevated bg-surface-elevated border rounded-md overflow-hidden"><p className="px-4 py-3 text-sm font-medium border-b">Notifications</p><div className="p-4 text-sm text-text-secondary">2 tasks are awaiting your assignment approval.</div></div>}
+          {notificationsOpen && <div className="absolute right-0 top-12 w-80 card-elevated bg-surface-elevated border rounded-md overflow-hidden"><p className="px-4 py-3 text-sm font-medium border-b">Notifications</p><div className="divide-y divide-border"><div className="px-4 py-3"><p className="text-sm font-medium">New task assigned to Ramesh</p><p className="mt-1 text-xs text-text-secondary">Complete beam B12 shuttering · just now</p></div><div className="px-4 py-3"><p className="text-sm font-medium">Daily report reminder</p><p className="mt-1 text-xs text-text-secondary">Submit the day-shift report by 5:00 PM</p></div><div className="px-4 py-3"><p className="text-sm font-medium">Collaboration update</p><p className="mt-1 text-xs text-text-secondary">Electrical team accepted your coordination request</p></div></div></div>}
+          <div className="relative"><button onClick={() => { setProfileOpen(!profileOpen); setNotificationsOpen(false); }} className="flex items-center gap-2 px-2 py-1 rounded-md hover:bg-hover focus-ring" aria-label="Profile menu"><div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-xs font-semibold">RS</div><span className="hidden md:inline text-sm font-medium">Rahul Sharma</span><span className="text-text-secondary">⌄</span></button>{profileOpen && <div className="absolute right-0 top-11 w-60 card-elevated bg-surface-elevated border rounded-md overflow-hidden"><div className="px-4 py-3 border-b"><p className="text-sm font-medium">Rahul Sharma</p><p className="text-xs text-text-secondary">Site Supervisor · Day shift</p></div><Link href="/supervisor/profile" className="block px-4 py-3 text-sm hover:bg-hover">Profile & availability</Link></div>}</div>
         </div>
       </header>
       <main className="flex-1 p-6 lg:p-8 pt-20 lg:pt-24"><div className="max-w-7xl mx-auto w-full">{children}</div></main>

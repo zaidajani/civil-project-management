@@ -45,6 +45,12 @@ function formatDateOptional(dateStr?: string) {
   return dateStr ? formatDate(dateStr) : "—";
 }
 
+const dummyRecentAudits: ScheduleUpdateAudit[] = [
+  { id: "demo-audit-1", eventId: "demo-event-1", activityId: "task-009", activityCode: "STR-B12", activityName: "Beam B12 shuttering", newActualStart: "2026-09-10", updateType: "ACTUAL_START", confidence: 94, sourceType: "SUPERVISOR", updatedAt: "2026-09-10T09:40:00", updatedBy: "Rahul Sharma" },
+  { id: "demo-audit-2", eventId: "demo-event-2", activityId: "task-010", activityCode: "ELE-C07", activityName: "East block conduit installation", newActualEnd: "2026-09-09", updateType: "ACTUAL_END", confidence: 88, sourceType: "DAILY_REPORT", updatedAt: "2026-09-09T17:20:00", updatedBy: "Site Team" },
+  { id: "demo-audit-3", eventId: "demo-event-3", activityId: "task-008", activityCode: "STR-P06", activityName: "Pier P06 reinforcement", newActualStart: "2026-09-09", updateType: "ACTUAL_START", confidence: 91, sourceType: "SPREADSHEET", updatedAt: "2026-09-09T12:15:00", updatedBy: "Planning Desk" },
+];
+
 function getLatestProgress(taskId: string): number {
   const updates = progressUpdates.filter(p => p.taskId === taskId);
   if (updates.length === 0) return 0;
@@ -124,7 +130,8 @@ export default function PMPage() {
   const atRiskL5L6 = delayedActivities.filter(a => a.healthStatus === "AT_RISK");
 
   const recentAudits = useMemo(() => {
-    return [...auditTrail].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 5);
+    const source = auditTrail.length > 0 ? auditTrail : dummyRecentAudits;
+    return [...source].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()).slice(0, 5);
   }, [auditTrail]);
 
   const totalL5L6 = projectVariance.onTrack + projectVariance.atRisk + projectVariance.delayed + projectVariance.completed;
