@@ -1,4 +1,4 @@
-export type SupervisorTaskStatus = "Awaiting Approval" | "Assigned" | "In Progress" | "Completed" | "Blocked";
+export type SupervisorTaskStatus = "Unassigned" | "Assigned" | "In Progress" | "Completed" | "Blocked";
 export type DispatchStatus = "Not sent" | "Queued" | "Sent" | "Delivered" | "Read" | "Accepted";
 export type TaskPriority = "Low" | "Medium" | "High" | "Critical";
 
