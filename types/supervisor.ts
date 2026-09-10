@@ -23,10 +23,14 @@ export interface Labourer {
   zone: string;
   availability: "Available" | "Limited" | "Engaged";
   activeTasks: number;
+  experience: number;
+  skills: string[];
+  previousWork: string[];
+  tradeCategory: "Civil" | "Electrical" | "Plumbing" | "Structural" | "Finishing";
 }
 
 export interface Classification {
-  discipline: "Civil" | "Structural" | "Electrical" | "Finishing" | "General";
+  discipline: "Civil" | "Structural" | "Electrical" | "Finishing" | "Plumbing" | "General";
   level: 5 | 6;
   hierarchyLabel: string;
   parentTaskId: string;
@@ -50,6 +54,8 @@ export interface SupervisorTask {
   dispatchStatus: DispatchStatus;
   createdAt: string;
   source: "Manual" | "Converse";
+  completedAt?: string;
+  previousStatus?: SupervisorTaskStatus;
 }
 
 export interface Collaboration {
@@ -79,4 +85,10 @@ export interface ConversationMessage {
   id: string;
   role: "assistant" | "user";
   content: string;
+}
+
+export interface RecommendationResult {
+  labourer: Labourer;
+  score: number;
+  reasons: string[];
 }
