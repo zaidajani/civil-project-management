@@ -18,6 +18,7 @@ export const supervisorStore = {
   tasks: () => getStored<SupervisorTask & { suggestedTeamId?: string; assignedTeamId?: string }>(keys.tasks, seededSupervisorTasks).map(task => ({
     ...task,
     suggestedLabourerId: task.suggestedLabourerId ?? labourers.find(labourer => labourer.teamId === task.suggestedTeamId)?.id ?? "labourer-001",
+    status: (task.status as string) === "Awaiting Approval" ? (task.assignedLabourerId ? "Assigned" : "Unassigned") : task.status,
     assignedLabourerId: task.assignedLabourerId ?? (task.assignedTeamId ? labourers.find(labourer => labourer.teamId === task.assignedTeamId)?.id : undefined),
   })),
   saveTasks: (tasks: SupervisorTask[]) => save(keys.tasks, tasks),
@@ -32,7 +33,7 @@ export function classifyTask(text: string): Classification {
   if (/(conduit|cable|electrical|panel|wire)/.test(normalized)) return { discipline: "Electrical", level: 6, hierarchyLabel: "Electrical Works › LV Distribution › Conduit installation", parentTaskId: "task-010", confidence: 91, reasoning: "The task describes an electrical installation or verification activity." };
   if (/(finish|paint|tile|masonry|plaster)/.test(normalized)) return { discipline: "Finishing", level: 6, hierarchyLabel: "Finishing Works › Architectural Finishes › Site activity", parentTaskId: "task-011", confidence: 88, reasoning: "The task relates to an executable finishing activity." };
   if (/(excavat|foundation|pile|earthwork)/.test(normalized)) return { discipline: "Civil", level: 6, hierarchyLabel: "Civil Works › Foundation Works › Site activity", parentTaskId: "task-006", confidence: 89, reasoning: "The task maps to civil and foundation work." };
-  return { discipline: "Structural", level: 6, hierarchyLabel: "Structural Works › Superstructure › Site activity", parentTaskId: "task-009", confidence: /(beam|rebar|reinforcement|shutter|concrete|slab|column)/.test(normalized) ? 94 : 72, reasoning: "The task is being treated as a structural executable activity; review the proposed parent before approval." };
+  return { discipline: "Structural", level: 6, hierarchyLabel: "Structural Works › Superstructure › Site activity", parentTaskId: "task-009", confidence: /(beam|rebar|reinforcement|shutter|concrete|slab|column)/.test(normalized) ? 94 : 72, reasoning: "The task is being treated as a structural executable activity." };
 }
 
 export function recommendLabourer(classification: Classification) {
@@ -43,5 +44,6 @@ export function recommendLabourer(classification: Classification) {
 export function createSupervisorTask(input: { description: string; location: string; dueDate: string; priority: TaskPriority; source: "Manual" | "Converse" }): SupervisorTask {
   const classification = classifyTask(input.description);
   const labourer = recommendLabourer(classification);
-  return { id: `sup-task-${Date.now()}`, title: input.description.length > 58 ? `${input.description.slice(0, 58)}…` : input.description, description: input.description, location: input.location || "Location to be confirmed", dueDate: input.dueDate || "2026-09-05", priority: input.priority, status: "Awaiting Approval", classification, suggestedLabourerId: labourer.id, assignmentReason: `${labourer.name} is available in ${labourer.zone} and is a suitable ${labourer.trade.toLowerCase()} for this task.`, dispatchStatus: "Not sent", createdAt: new Date().toISOString(), source: input.source };
+  const assigned = classification.confidence >= 80;
+  return { id: `sup-task-${Date.now()}`, title: input.description.length > 58 ? `${input.description.slice(0, 58)}…` : input.description, description: input.description, location: input.location || "Location to be confirmed", dueDate: input.dueDate || "2026-09-05", priority: input.priority, status: assigned ? "Assigned" : "Unassigned", classification, suggestedLabourerId: labourer.id, assignedLabourerId: assigned ? labourer.id : undefined, assignmentReason: `${labourer.name} is available in ${labourer.zone} and is a suitable ${labourer.trade.toLowerCase()} for this task.`, dispatchStatus: assigned ? "Queued" : "Not sent", createdAt: new Date().toISOString(), source: input.source };
 }

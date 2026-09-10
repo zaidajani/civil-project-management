@@ -21,7 +21,7 @@ export const labourers: Labourer[] = [
 
 export const seededSupervisorTasks: SupervisorTask[] = [
   {
-    id: "sup-task-001", title: "Complete beam B12 shuttering", description: "Finish the remaining formwork and arrange a level check before reinforcement starts.", location: "Platform level — Grid B12", dueDate: "2026-09-04", priority: "High", status: "Awaiting Approval",
+    id: "sup-task-001", title: "Complete beam B12 shuttering", description: "Finish the remaining formwork and arrange a level check before reinforcement starts.", location: "Platform level — Grid B12", dueDate: "2026-09-04", priority: "High", status: "Assigned",
     classification: { discipline: "Structural", level: 6, hierarchyLabel: "Structural Works › Superstructure › Beam Works", parentTaskId: "task-009", confidence: 94, reasoning: "Beam formwork is a specific structural field activity." }, suggestedLabourerId: "labourer-001", assignmentReason: "Ramesh Patil is available at platform level and is the least-loaded shuttering carpenter.", dispatchStatus: "Not sent", createdAt: "2026-09-04T08:30:00", source: "Manual",
   },
   {
