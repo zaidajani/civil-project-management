@@ -1,12 +1,16 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useAuth } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 export function Header() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const notificationsRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+  const { user, logout } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -20,6 +24,12 @@ export function Header() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <header className="header fixed top-0 left-64 right-0 z-30 h-16 flex items-center justify-between px-5 lg:px-6 border-b">
@@ -65,11 +75,11 @@ export function Header() {
             aria-haspopup="true"
           >
             <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-sm font-semibold">PM</span>
+              <span className="text-white text-sm font-semibold">{user?.role === "pm" ? "PM" : "SV"}</span>
             </div>
             <div className="hidden lg:block text-left">
-              <p className="text-sm font-medium text-text-primary truncate max-w-[160px]">Project Manager</p>
-              <p className="text-xs text-text-secondary truncate max-w-[160px]">pm@civilmanager.com</p>
+              <p className="text-sm font-medium text-text-primary truncate max-w-[160px]">{user?.name ?? "Project Manager"}</p>
+              <p className="text-xs text-text-secondary truncate max-w-[160px]">{user?.email ?? "pm@civilmanager.com"}</p>
             </div>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-text-secondary lg:hidden" aria-hidden="true">
               <polyline points="6 9 12 15 18 9" />
@@ -79,8 +89,8 @@ export function Header() {
           {showProfileMenu && (
             <div className="absolute right-0 top-full mt-2 w-56 card-elevated py-2 animate-in fade-in-0 zoom-in-95 duration-150">
               <div className="px-4 py-3 border-b">
-                <p className="text-sm font-medium text-text-primary truncate">Project Manager</p>
-                <p className="text-xs text-text-secondary truncate">pm@civilmanager.com</p>
+                <p className="text-sm font-medium text-text-primary truncate">{user?.name ?? "Project Manager"}</p>
+                <p className="text-xs text-text-secondary truncate">{user?.email ?? "pm@civilmanager.com"}</p>
               </div>
               <a href="/pm/profile" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-hover focus-ring rounded-md mx-2 my-1" style={{ borderRadius: 'var(--radius-sm)' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -92,12 +102,12 @@ export function Header() {
               <a href="/pm/settings" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-hover focus-ring rounded-md mx-2 my-1" style={{ borderRadius: 'var(--radius-sm)' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2-2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
                 </svg>
                 Settings
               </a>
               <hr className="my-2 border-border" />
-              <button className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-status-delayed hover:bg-hover focus-ring rounded-md mx-2 my-1" style={{ borderRadius: 'var(--radius-sm)' }}>
+              <button onClick={handleLogout} className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-status-delayed hover:bg-hover focus-ring rounded-md mx-2 my-1" style={{ borderRadius: 'var(--radius-sm)' }}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
                   <polyline points="16 17 21 12 16 7" />

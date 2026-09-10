@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth";
 
 const navigation = [
   { href: "/pm", label: "Overview", icon: "overview" },
@@ -114,6 +115,7 @@ const Icons = {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   return (
     <aside className="sidebar fixed top-0 left-0 z-40 h-screen w-64 flex flex-col border-r">
@@ -174,10 +176,10 @@ export function Sidebar() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-text-primary truncate">
-                Project Manager
+                {user?.name ?? "Project Manager"}
               </p>
               <p className="text-xs text-text-secondary truncate">
-                pm@civilmanager.com
+                {user?.email ?? "pm@civilmanager.com"}
               </p>
             </div>
           </div>

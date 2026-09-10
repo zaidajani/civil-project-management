@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth";
+import { useRouter } from "next/navigation";
 
 const navigation = [
   { href: "/supervisor", label: "Overview", mark: "▦" },
@@ -15,6 +17,26 @@ const navigation = [
 export function SupervisorLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    router.push("/login");
+    router.refresh();
+  };
 
   return <div className="min-h-screen bg-bg flex">
     <aside className="sidebar fixed top-0 left-0 z-40 h-screen w-64 flex flex-col border-r">
@@ -40,7 +62,38 @@ export function SupervisorLayout({ children }: { children: ReactNode }) {
       <div className="border-t p-3">
         <div className="flex items-center gap-3 px-3 py-2.5">
           <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-white text-sm font-semibold">RS</div>
-          <div className="min-w-0"><p className="text-sm font-medium text-text-primary truncate">Rahul Sharma</p><p className="text-xs text-text-secondary truncate">Site Supervisor</p></div>
+          <div className="min-w-0"><p className="text-sm font-medium text-text-primary truncate">{user?.name ?? "Rahul Sharma"}</p><p className="text-xs text-text-secondary truncate">{user?.email ?? "supervisor@civilmanager.com"}</p></div>
+        </div>
+        <div className="mt-2" ref={profileRef}>
+          <button
+            className="btn-icon flex items-center gap-2.5 w-full px-3 py-2 rounded-md focus-ring"
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            aria-label="Profile menu"
+            aria-expanded={showProfileMenu}
+            aria-haspopup="true"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="text-text-secondary" aria-hidden="true">
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+            <span className="text-sm text-text-secondary">Menu</span>
+          </button>
+          {showProfileMenu && (
+            <div className="absolute bottom-full left-0 right-0 mb-2 w-56 card-elevated py-2 animate-in fade-in-0 zoom-in-95 duration-150 mx-auto">
+              <div className="px-4 py-3 border-b">
+                <p className="text-sm font-medium text-text-primary truncate">{user?.name ?? "Rahul Sharma"}</p>
+                <p className="text-xs text-text-secondary truncate">{user?.email ?? "supervisor@civilmanager.com"}</p>
+              </div>
+              <hr className="my-2 border-border" />
+              <button onClick={handleLogout} className="flex items-center gap-2.5 w-full px-4 py-2.5 text-sm text-status-delayed hover:bg-hover focus-ring rounded-md mx-2 my-1" style={{ borderRadius: 'var(--radius-sm)' }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg>
+                Sign out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </aside>

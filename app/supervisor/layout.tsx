@@ -1,8 +1,17 @@
-import { Metadata } from "next";
+"use client";
+
+import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
 import { SupervisorLayout } from "@/components/layout/SupervisorLayout";
+import { ReactNode } from "react";
 
-export const metadata: Metadata = { title: "CivilManager - Supervisor Portal", description: "Field supervisor workspace for CivilManager" };
-
-export default function SupervisorRootLayout({ children }: { children: React.ReactNode }) {
-  return <SupervisorLayout>{children}</SupervisorLayout>;
+export default function SupervisorRootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
+  return (
+    <ProtectedLayout allowedRole="supervisor" portalName="Supervisor">
+      <SupervisorLayout>{children}</SupervisorLayout>
+    </ProtectedLayout>
+  );
 }

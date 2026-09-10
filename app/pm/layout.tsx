@@ -1,19 +1,17 @@
-import { Metadata } from "next";
-import { PMLayout } from "@/components/layout/PMLayout";
+"use client";
 
-export const metadata: Metadata = {
-  title: "CivilManager - Project Manager Portal",
-  description: "Project Manager Portal for CivilManager",
-};
+import { ProtectedLayout } from "@/components/layout/ProtectedLayout";
+import { PMLayout } from "@/components/layout/PMLayout";
+import { ReactNode } from "react";
 
 export default function PMRootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
 }) {
   return (
-    <PMLayout>
-      {children}
-    </PMLayout>
+    <ProtectedLayout allowedRole="pm" portalName="PM">
+      <PMLayout>{children}</PMLayout>
+    </ProtectedLayout>
   );
 }
